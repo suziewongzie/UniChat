@@ -80,7 +80,7 @@ export const ContactList: React.FC<ContactListProps> = ({
           // Skeleton Loading State
           <div className="space-y-4 p-4">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex items-center gap-4 animate-pulse">
+              <div key={i} className="flex items-center gap-5 animate-pulse">
                 <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
                 <div className="flex-1 space-y-2">
                   <div className="h-4 bg-gray-200 rounded w-1/3"></div>
@@ -95,7 +95,7 @@ export const ContactList: React.FC<ContactListProps> = ({
               <div
                 key={contact.id}
                 onClick={() => onSelectContact(contact)}
-                className={`flex items-center gap-4 px-4 py-4 cursor-pointer transition-colors border-b border-gray-50 hover:bg-gray-50
+                className={`flex items-center gap-5 px-4 py-4 cursor-pointer transition-colors border-b border-gray-50 hover:bg-gray-50
                   ${activeContactId === contact.id ? 'bg-indigo-50/60 border-indigo-100' : ''}`}
               >
                 <div className="relative">

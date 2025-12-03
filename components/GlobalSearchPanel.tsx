@@ -127,7 +127,7 @@ export const GlobalSearchPanel: React.FC<GlobalSearchPanelProps> = ({ onClose, o
               <div 
                 key={result.id}
                 onClick={() => onSelectResult(result.contact, result.message?.id)}
-                className="group flex gap-4 p-3 hover:bg-white rounded-xl cursor-pointer transition-colors border border-transparent hover:border-gray-100 hover:shadow-sm"
+                className="group flex gap-5 p-3 hover:bg-white rounded-xl cursor-pointer transition-colors border border-transparent hover:border-gray-100 hover:shadow-sm"
               >
                 <div className="relative flex-shrink-0">
                   <img src={result.contact.avatar} alt={result.contact.name} className="w-12 h-12 rounded-full object-cover" />
