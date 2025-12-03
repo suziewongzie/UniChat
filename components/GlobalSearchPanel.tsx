@@ -92,14 +92,14 @@ export const GlobalSearchPanel: React.FC<GlobalSearchPanelProps> = ({ onClose, o
             <button
               key={f.label}
               onClick={() => toggleFilter(f.type)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border
                 ${activeFilters.includes(f.type as MessageType) 
                   ? 'bg-slate-800 text-white border-slate-800' 
                   : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
                 }
               `}
             >
-              <div className="w-4 h-4">{f.icon}</div>
+              <div className="w-4 h-4 flex-shrink-0 [&>svg]:w-full [&>svg]:h-full">{f.icon}</div>
               {f.label}
             </button>
           ))}
@@ -132,7 +132,7 @@ export const GlobalSearchPanel: React.FC<GlobalSearchPanelProps> = ({ onClose, o
                 <div className="relative flex-shrink-0">
                   <img src={result.contact.avatar} alt={result.contact.name} className="w-12 h-12 rounded-full object-cover" />
                   <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
-                    <div className="w-4 h-4 text-indigo-600">
+                    <div className="w-4 h-4 text-indigo-600 [&>svg]:w-full [&>svg]:h-full">
                         {getPlatformIcon(result.contact.platform)}
                     </div>
                   </div>
@@ -152,11 +152,11 @@ export const GlobalSearchPanel: React.FC<GlobalSearchPanelProps> = ({ onClose, o
                      <p className="text-xs text-gray-500">Contact found</p>
                   ) : (
                      <div className="text-sm text-gray-600 mt-0.5 min-w-0">
-                        {result.matchType === 'image' && <span className="flex items-center gap-1 text-indigo-600 truncate"><span className="w-3 h-3 flex-shrink-0">{Icons.Photo}</span> Photo</span>}
-                        {result.matchType === 'video' && <span className="flex items-center gap-1 text-indigo-600 truncate"><span className="w-3 h-3 flex-shrink-0">{Icons.Video}</span> Video</span>}
-                        {result.matchType === 'document' && <span className="flex items-center gap-1 text-indigo-600 truncate"><span className="w-3 h-3 flex-shrink-0">{Icons.Document}</span> {result.message?.fileName}</span>}
+                        {result.matchType === 'image' && <span className="flex items-center gap-1 text-indigo-600 truncate"><span className="w-3 h-3 flex-shrink-0 [&>svg]:w-full [&>svg]:h-full">{Icons.Photo}</span> Photo</span>}
+                        {result.matchType === 'video' && <span className="flex items-center gap-1 text-indigo-600 truncate"><span className="w-3 h-3 flex-shrink-0 [&>svg]:w-full [&>svg]:h-full">{Icons.Video}</span> Video</span>}
+                        {result.matchType === 'document' && <span className="flex items-center gap-1 text-indigo-600 truncate"><span className="w-3 h-3 flex-shrink-0 [&>svg]:w-full [&>svg]:h-full">{Icons.Document}</span> {result.message?.fileName}</span>}
                         {result.matchType === 'text' && <p className="truncate line-clamp-2">{result.message?.text}</p>}
-                        {result.matchType === 'link' && <span className="flex items-center gap-1 text-blue-600 truncate"><span className="w-3 h-3 flex-shrink-0">{Icons.Link}</span> Link</span>}
+                        {result.matchType === 'link' && <span className="flex items-center gap-1 text-blue-600 truncate"><span className="w-3 h-3 flex-shrink-0 [&>svg]:w-full [&>svg]:h-full">{Icons.Link}</span> Link</span>}
                      </div>
                   )}
                 </div>
