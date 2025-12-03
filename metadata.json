@@ -1,0 +1,7 @@
+{
+  "name": "UniChat - Unified Messaging",
+  "description": "A unified messaging interface combining WhatsApp, Instagram, LinkedIn, and Messenger into a single, seamless dashboard powered by AI for smart replies.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
