@@ -221,28 +221,28 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
 
       {/* Header */}
       <div className="bg-white border-b border-gray-200 p-4 flex justify-between items-center shadow-sm relative z-10">
-        <div className="flex items-center gap-3">
-          <button onClick={onBack} className="md:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-full">
+        <div className="flex items-center gap-3 flex-1 min-w-0 mr-2">
+          <button onClick={onBack} className="md:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-full flex-shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
           </button>
           
-          <img src={contact.avatar} alt={contact.name} className="w-10 h-10 rounded-full object-cover" />
-          <div>
-            <h3 className="font-bold text-slate-800 text-sm md:text-base">{contact.name}</h3>
+          <img src={contact.avatar} alt={contact.name} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+          <div className="min-w-0">
+            <h3 className="font-bold text-slate-800 text-sm md:text-base truncate">{contact.name}</h3>
             {contact.platform === 'linkedin' && contact.role ? (
-               <p className="text-xs text-gray-500">{contact.role}</p>
+               <p className="text-xs text-gray-500 truncate">{contact.role}</p>
             ) : (
                 <div className="flex items-center gap-1.5">
-                    {contact.isOnline && <span className="w-2 h-2 bg-green-500 rounded-full"></span>}
+                    {contact.isOnline && <span className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></span>}
                     <p className="text-xs text-gray-500">{contact.isOnline ? 'Online' : 'Offline'}</p>
                 </div>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4 text-indigo-600">
+        <div className="flex items-center gap-2 md:gap-4 text-indigo-600 flex-shrink-0">
             <button className="p-2 hover:bg-indigo-50 rounded-full transition-colors">{Icons.Phone}</button>
             <button className="p-2 hover:bg-indigo-50 rounded-full transition-colors">{Icons.Video}</button>
             <button className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500">{Icons.More}</button>

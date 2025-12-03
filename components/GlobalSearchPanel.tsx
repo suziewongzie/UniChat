@@ -127,7 +127,7 @@ export const GlobalSearchPanel: React.FC<GlobalSearchPanelProps> = ({ onClose, o
               <div 
                 key={result.id}
                 onClick={() => onSelectResult(result.contact, result.message?.id)}
-                className="group flex gap-3 p-3 hover:bg-white rounded-xl cursor-pointer transition-colors border border-transparent hover:border-gray-100 hover:shadow-sm"
+                className="group flex gap-4 p-3 hover:bg-white rounded-xl cursor-pointer transition-colors border border-transparent hover:border-gray-100 hover:shadow-sm"
               >
                 <div className="relative flex-shrink-0">
                   <img src={result.contact.avatar} alt={result.contact.name} className="w-12 h-12 rounded-full object-cover" />
@@ -142,7 +142,7 @@ export const GlobalSearchPanel: React.FC<GlobalSearchPanelProps> = ({ onClose, o
                   <div className="flex justify-between items-start">
                     <h4 className="font-semibold text-slate-800 truncate">{result.contact.name}</h4>
                     {result.message && (
-                         <span className="text-[10px] text-gray-400 whitespace-nowrap">
+                         <span className="text-[10px] text-gray-400 whitespace-nowrap ml-2">
                             {result.message.timestamp.toLocaleDateString()}
                          </span>
                     )}
@@ -151,12 +151,12 @@ export const GlobalSearchPanel: React.FC<GlobalSearchPanelProps> = ({ onClose, o
                   {result.type === 'contact' ? (
                      <p className="text-xs text-gray-500">Contact found</p>
                   ) : (
-                     <div className="text-sm text-gray-600 mt-0.5">
-                        {result.matchType === 'image' && <span className="flex items-center gap-1 text-indigo-600"><span className="w-3 h-3">{Icons.Photo}</span> Photo</span>}
-                        {result.matchType === 'video' && <span className="flex items-center gap-1 text-indigo-600"><span className="w-3 h-3">{Icons.Video}</span> Video</span>}
-                        {result.matchType === 'document' && <span className="flex items-center gap-1 text-indigo-600"><span className="w-3 h-3">{Icons.Document}</span> {result.message?.fileName}</span>}
+                     <div className="text-sm text-gray-600 mt-0.5 min-w-0">
+                        {result.matchType === 'image' && <span className="flex items-center gap-1 text-indigo-600 truncate"><span className="w-3 h-3 flex-shrink-0">{Icons.Photo}</span> Photo</span>}
+                        {result.matchType === 'video' && <span className="flex items-center gap-1 text-indigo-600 truncate"><span className="w-3 h-3 flex-shrink-0">{Icons.Video}</span> Video</span>}
+                        {result.matchType === 'document' && <span className="flex items-center gap-1 text-indigo-600 truncate"><span className="w-3 h-3 flex-shrink-0">{Icons.Document}</span> {result.message?.fileName}</span>}
                         {result.matchType === 'text' && <p className="truncate line-clamp-2">{result.message?.text}</p>}
-                        {result.matchType === 'link' && <span className="flex items-center gap-1 text-blue-600"><span className="w-3 h-3">{Icons.Link}</span> Link</span>}
+                        {result.matchType === 'link' && <span className="flex items-center gap-1 text-blue-600 truncate"><span className="w-3 h-3 flex-shrink-0">{Icons.Link}</span> Link</span>}
                      </div>
                   )}
                 </div>
