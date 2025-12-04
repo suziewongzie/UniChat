@@ -1,7 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
 import { Message, Platform } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Do not initialize "ai" here at the top level. 
+// It causes the app to crash on Vercel if process.env is undefined during the initial JS load.
 
 export const generateSmartReply = async (
   history: Message[],
@@ -10,6 +11,18 @@ export const generateSmartReply = async (
   role?: string
 ): Promise<string> => {
   try {
+    // Initialize inside the function call
+    // This ensures we only access process.env.API_KEY when the function is actually called,
+    // and after the app has fully mounted.
+    const apiKey = process.env.API_KEY;
+    
+    if (!apiKey) {
+      console.warn("Gemini API Key is missing");
+      return "Thinking... (API Key Missing)";
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+
     const context = history.map(m => `${m.sender === 'me' ? 'Me' : contactName}: ${m.text}`).join('\n');
     
     let personaInstruction = '';

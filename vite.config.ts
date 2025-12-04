@@ -11,8 +11,9 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     define: {
-      // Explicitly polyfill ONLY the API_KEY to avoid leaking other server-side env vars
-      // and to prevent 'process is not defined' errors in the browser.
+      // Prevents "process is not defined" error in the browser
+      'process.env': {},
+      // Explicitly inject the API key
       'process.env.API_KEY': JSON.stringify(env.API_KEY)
     }
   }
