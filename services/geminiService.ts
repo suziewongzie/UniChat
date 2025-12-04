@@ -14,11 +14,12 @@ export const generateSmartReply = async (
     // Initialize inside the function call
     // This ensures we only access process.env.API_KEY when the function is actually called,
     // and after the app has fully mounted.
-    const apiKey = process.env.API_KEY;
+    // Use optional chaining or fallback to empty object just in case the polyfill missed something (unlikely with new vite config)
+    const apiKey = typeof process !== 'undefined' ? process.env?.API_KEY : '';
     
     if (!apiKey) {
       console.warn("Gemini API Key is missing");
-      return "Thinking... (API Key Missing)";
+      return "Thinking... (API Key Missing. Please set API_KEY in Vercel settings)";
     }
 
     const ai = new GoogleGenAI({ apiKey });

@@ -3,16 +3,25 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // Load env file based on `mode` in the current directory.
   const env = loadEnv(mode, '.', '');
   
   return {
     plugins: [react()],
     define: {
-      // Prevents "process is not defined" error in browser
-      'process.env': {},
-      // Explicitly inject the API key
-      'process.env.API_KEY': JSON.stringify(env.API_KEY),
+      // Define 'process' globally to fix "process is not defined" errors
+      'process': {
+        env: {
+          API_KEY: JSON.stringify(env.API_KEY),
+          NODE_ENV: JSON.stringify(mode)
+        },
+        version: JSON.stringify(''),
+        platform: JSON.stringify('browser')
+      },
+      // Also define process.env specifically for libs that access it directly
+      'process.env': {
+         API_KEY: JSON.stringify(env.API_KEY),
+         NODE_ENV: JSON.stringify(mode)
+      }
     }
   }
 })

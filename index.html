@@ -29,7 +29,19 @@
         animation: bounce-slow 1s infinite;
       }
     </style>
-  <script type="importmap">
+    <!-- Error Logger: Catches white-screen crashes and shows them -->
+    <script>
+      window.addEventListener('error', function(e) {
+        // Ignore resize observations errors which are harmless
+        if (e.message === 'ResizeObserver loop limit exceeded') return;
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:white; color:red; z-index:9999; padding:20px; overflow:auto; font-family:monospace;';
+        errorDiv.innerHTML = '<h1>Application Error</h1><h3>' + e.message + '</h3><pre>' + (e.error ? e.error.stack : 'No stack trace') + '</pre>';
+        document.body.appendChild(errorDiv);
+      });
+    </script>
+<script type="importmap">
 {
   "imports": {
     "react": "https://aistudiocdn.com/react@^19.2.1",
