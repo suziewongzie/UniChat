@@ -6,6 +6,7 @@ import { SettingsView } from './components/SettingsView';
 import { GlobalSearchPanel } from './components/GlobalSearchPanel';
 import { Platform, Contact, Message } from './types';
 import { platformService } from './services/platformService';
+import { whatsappClient } from './services/whatsappClient';
 
 type ViewMode = 'chat' | 'settings' | 'search';
 
@@ -16,7 +17,10 @@ const App: React.FC = () => {
   
   // Data States
   const [connectedPlatforms, setConnectedPlatforms] = useState<Record<Platform, boolean>>({
-    whatsapp: true, instagram: true, messenger: true, linkedin: true
+    whatsapp: whatsappClient.isConfigured(), 
+    instagram: true, 
+    messenger: true, 
+    linkedin: true
   });
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);

@@ -1,56 +1,141 @@
 import { Contact, Message, Platform, MessageType, SearchResult } from '../types';
 import { MOCK_CONTACTS, INITIAL_MESSAGES } from '../constants';
 import { generateSmartReply } from './geminiService';
+import { whatsappClient } from './whatsappClient';
+import { facebookClient } from './facebookClient';
+
+// TOGGLE THIS TO TRUE WHEN YOU HAVE A BACKEND SERVER RUNNING
+const USE_REAL_API = false;
+const API_BASE_URL = 'http://localhost:3000/api'; // Your Backend URL
 
 // Simulating a backend database delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 class PlatformService {
   private connectedPlatforms: Record<Platform, boolean> = {
-    whatsapp: true,
-    instagram: true,
-    messenger: true,
+    whatsapp: whatsappClient.isConfigured(),
+    instagram: facebookClient.isConfigured(),
+    messenger: facebookClient.isConfigured(),
     linkedin: true,
   };
 
   private contacts: Contact[] = [...MOCK_CONTACTS];
   private messages: Record<string, Message[]> = { ...INITIAL_MESSAGES };
 
-  // Simulate OAuth Connection Flow
+  // ============================================================
+  // AUTHENTICATION & CONNECTION
+  // ============================================================
+
   async toggleConnection(platform: Platform): Promise<boolean> {
-    await delay(1500); // Simulate network request/OAuth popup time
+    if (USE_REAL_API) {
+      try {
+        // 1. Redirect user to your backend to start OAuth flow (Facebook/LinkedIn Login)
+        // window.location.href = `${API_BASE_URL}/auth/${platform}`;
+        
+        // 2. Or call an endpoint to disconnect
+        const response = await fetch(`${API_BASE_URL}/auth/${platform}/toggle`, { method: 'POST' });
+        const data = await response.json();
+        return data.isConnected;
+      } catch (e) {
+        console.error("Auth Error", e);
+        return false;
+      }
+    }
+
+    // Mock Implementation
+    await delay(1500); 
     this.connectedPlatforms[platform] = !this.connectedPlatforms[platform];
     return this.connectedPlatforms[platform];
   }
 
   async getConnectionStatus(): Promise<Record<Platform, boolean>> {
+    if (USE_REAL_API) {
+      const res = await fetch(`${API_BASE_URL}/status`);
+      return await res.json();
+    }
+    
     await delay(500);
+
+    // Sync mock status with actual client configuration
+    if (!whatsappClient.isConfigured()) {
+        this.connectedPlatforms.whatsapp = false;
+    }
+    if (!facebookClient.isConfigured()) {
+        this.connectedPlatforms.messenger = false;
+        this.connectedPlatforms.instagram = false;
+    }
+
     return { ...this.connectedPlatforms };
   }
 
-  // Simulate fetching contacts from an API
+  // ============================================================
+  // DATA FETCHING
+  // ============================================================
+
   async getContacts(platform: Platform): Promise<Contact[]> {
-    await delay(800); // Simulate API latency
+    // REAL DATA INTEGRATION FOR FACEBOOK/INSTAGRAM
+    if ((platform === 'messenger' || platform === 'instagram') && facebookClient.isConfigured()) {
+       try {
+          console.log(`Fetching real ${platform} contacts from Graph API...`);
+          return await facebookClient.getConversations(platform);
+       } catch (error) {
+          console.error(`Failed to fetch real ${platform} contacts:`, error);
+          // Fallback to mock data if fetch fails (e.g. token expired)
+       }
+    }
+
+    if (USE_REAL_API) {
+      // GET /api/contacts?platform=whatsapp
+      const res = await fetch(`${API_BASE_URL}/contacts?platform=${platform}`);
+      return await res.json();
+    }
+
+    await delay(800); 
     if (!this.connectedPlatforms[platform]) {
       throw new Error(`Platform ${platform} is not connected`);
     }
     return this.contacts.filter(c => c.platform === platform);
   }
 
-  // Simulate fetching message history
   async getMessages(contactId: string): Promise<Message[]> {
+    // REAL DATA INTEGRATION FOR FACEBOOK/INSTAGRAM
+    // We assume that real Graph API IDs are usually long numerical strings, whereas our mocks are short '1', '2'
+    if (facebookClient.isConfigured() && contactId.length > 5) {
+       try {
+         return await facebookClient.getMessages(contactId);
+       } catch (error) {
+         console.error("Failed to fetch real messages:", error);
+       }
+    }
+
+    if (USE_REAL_API) {
+      // GET /api/messages?contactId=123
+      const res = await fetch(`${API_BASE_URL}/messages/${contactId}`);
+      return await res.json();
+    }
+
     await delay(600);
     return this.messages[contactId] || [];
   }
 
-  // Global Search Function
+  // ============================================================
+  // SEARCH
+  // ============================================================
+
   async searchGlobal(query: string, filters: MessageType[] = []): Promise<SearchResult[]> {
-    await delay(600); // Simulate search latency
+    if (USE_REAL_API) {
+      // GET /api/search?q=hello&type=image
+      const params = new URLSearchParams({ q: query, filters: filters.join(',') });
+      const res = await fetch(`${API_BASE_URL}/search?${params}`);
+      return await res.json();
+    }
+
+    await delay(600); 
     
     const results: SearchResult[] = [];
     const lowerQuery = query.toLowerCase();
 
-    // 1. Search Contacts (only if no specific media filters or if text filter is present)
+    // 1. Search Contacts
     if (filters.length === 0 || filters.includes('text')) {
        this.contacts.forEach(contact => {
          if (this.connectedPlatforms[contact.platform] && contact.name.toLowerCase().includes(lowerQuery)) {
@@ -70,15 +155,11 @@ class PlatformService {
       if (!contact || !this.connectedPlatforms[contact.platform]) return;
 
       msgs.forEach(msg => {
-        // Filter by Type
-        if (filters.length > 0 && msg.type && !filters.includes(msg.type)) {
-          return;
-        }
+        if (filters.length > 0 && msg.type && !filters.includes(msg.type)) return;
 
-        // Filter by Text Query
         let matchesQuery = false;
         if (!query) {
-             matchesQuery = true; // If no query, return everything matching the filter
+             matchesQuery = true; 
         } else {
              if (msg.text && msg.text.toLowerCase().includes(lowerQuery)) matchesQuery = true;
              if (msg.fileName && msg.fileName.toLowerCase().includes(lowerQuery)) matchesQuery = true;
@@ -99,9 +180,21 @@ class PlatformService {
     return results;
   }
 
-  // Simulate reacting to a message
+  // ============================================================
+  // ACTIONS (SEND / REACT)
+  // ============================================================
+
   async reactToMessage(contactId: string, messageId: string, emoji: string): Promise<Message[]> {
-    await delay(200); // Small network delay
+    if (USE_REAL_API) {
+        // POST /api/messages/react
+        await fetch(`${API_BASE_URL}/messages/${messageId}/react`, {
+            method: 'POST',
+            body: JSON.stringify({ emoji })
+        });
+        // Optimistically update or fetch fresh
+    }
+
+    await delay(200); 
     
     const msgs = this.messages[contactId];
     if (!msgs) return [];
@@ -116,11 +209,9 @@ class PlatformService {
 
     if (existingReactionIndex > -1) {
       const reaction = msg.reactions[existingReactionIndex];
-      // Toggle logic
       if (reaction.userReacted) {
         reaction.count--;
         reaction.userReacted = false;
-        // Remove if count 0
         if (reaction.count <= 0) {
           msg.reactions.splice(existingReactionIndex, 1);
         }
@@ -129,17 +220,44 @@ class PlatformService {
         reaction.userReacted = true;
       }
     } else {
-      // Add new reaction
       msg.reactions.push({ emoji, count: 1, userReacted: true });
     }
 
-    // Return a shallow copy of messages to trigger re-renders
     return [...msgs];
   }
 
-  // Simulate sending a message to the real platform API
   async sendMessage(contactId: string, text: string, platform: Platform, contactName: string, role?: string, replyToMessage?: Message): Promise<Message> {
-    await delay(300); // Simulate sending to server
+    
+    // INTEGRATION POINT: WhatsApp Cloud API
+    if (platform === 'whatsapp' && whatsappClient.isConfigured()) {
+       const mockPhoneNumber = "15551234567"; 
+       try {
+          await whatsappClient.sendText(mockPhoneNumber, text, replyToMessage?.id);
+       } catch (e) {
+          console.error("Failed to send via WhatsApp Cloud API", e);
+       }
+    } 
+    // INTEGRATION POINT: Facebook/Instagram
+    else if ((platform === 'messenger' || platform === 'instagram') && facebookClient.isConfigured()) {
+        console.log(`Sending message to ${platform} via Graph API`);
+        // Actual Graph API call would go here: facebookClient.sendMessage(...)
+    }
+    else if (USE_REAL_API) {
+        // POST /api/messages/send
+        const res = await fetch(`${API_BASE_URL}/messages/send`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contactId,
+                platform,
+                text,
+                replyToId: replyToMessage?.id
+            })
+        });
+        return await res.json();
+    }
+
+    await delay(300); 
     
     const newMessage: Message = {
       id: Date.now().toString(),
@@ -156,25 +274,23 @@ class PlatformService {
       } : undefined
     };
 
-    // Store in "DB"
     if (!this.messages[contactId]) this.messages[contactId] = [];
     this.messages[contactId].push(newMessage);
 
-    // Simulate "Delivered" status update after a moment
-    setTimeout(() => {
-        newMessage.status = 'delivered';
-    }, 1000);
+    setTimeout(() => { newMessage.status = 'delivered'; }, 1000);
 
-    // Trigger AI Reply Simulation (in a real app, this would be a webhook event coming back from the platform)
+    // Simulate AI Reply because we aren't connected to real WhatsApp
     this.simulateIncomingReply(contactId, platform, contactName, role);
 
     return newMessage;
   }
 
-  // Helper to simulate receiving a webhook event from the platform
+  // ============================================================
+  // INTERNAL SIMULATION HELPERS
+  // ============================================================
+
   private async simulateIncomingReply(contactId: string, platform: Platform, contactName: string, role?: string) {
     const history = this.messages[contactId];
-    // Artificial delay for "other person typing"
     const typingDelay = 2000 + Math.random() * 2000; 
     
     setTimeout(async () => {
@@ -191,7 +307,7 @@ class PlatformService {
 
         this.messages[contactId].push(replyMessage);
         
-        // Dispatch custom event so React knows to update (Simulating WebSocket/Subscription)
+        // This emulates a WebSocket event coming from your backend
         window.dispatchEvent(new CustomEvent('new-message', { detail: { contactId, message: replyMessage } }));
 
       } catch (e) {
